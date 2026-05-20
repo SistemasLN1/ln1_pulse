@@ -117,11 +117,11 @@ src/
 
 ```text
 app/
- ├── Http
+ ├── Http  F
  ├── Services
  ├── Repositories
  ├── Jobs
- ├── Models
+ ├── Models  FFFFFF
  ├── Integrations
  └── Console
 ```
