@@ -1,23 +1,25 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        authenticated: false,
-        user: null,
+        sesionActiva: false,
+        correoUsuario: '',
     }),
+
     actions: {
-        init() {
-            const el = document.getElementById('app')
-            this.authenticated = el?.dataset.authenticated === 'true'
-            this.user = {
-                email: el?.dataset.userEmail ?? null,
-            }
+        cargarSesion(el) {
+            this.sesionActiva = el.dataset.authenticated === '1';
+            this.correoUsuario = el.dataset.userEmail ?? '';
         },
-        async logout() {
-            await window.axios.post('/logout')
-            this.authenticated = false
-            this.user = null
-            window.location.href = '/login'
-        }
-    }
-})
+
+        actualizarSesion(email) {
+            this.sesionActiva = true;
+            this.correoUsuario = email;
+        },
+
+        limpiarSesion() {
+            this.sesionActiva = false;
+            this.correoUsuario = '';
+        },
+    },
+});

@@ -1,17 +1,21 @@
-import './bootstrap'
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
-import router from './router'
-import { useAuthStore } from './stores/auth'
+import './bootstrap';
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import App from './App.vue';
+import router from './router';
+import { useAuthStore } from './stores/auth';
 
-const app = createApp(App)
-const pinia = createPinia()
+const el = document.getElementById('app');
 
-app.use(pinia)
-app.use(router)
+if (el) {
+    const pinia = createPinia();
 
-const auth = useAuthStore()
-auth.init()
+    const app = createApp(App);
 
-app.mount('#app')
+    app.use(pinia);
+    app.use(router);
+
+    useAuthStore(pinia).cargarSesion(el);
+
+    app.mount(el);
+}
