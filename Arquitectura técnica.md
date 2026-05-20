@@ -103,11 +103,11 @@
 ```text
 src/
  ├── layouts
- ├── pages
- ├── components
+ ├── pages   X
+ ├── components              Z
  ├── stores
- ├── services
- ├── router
+ ├── services           Z
+ ├── router           Z
  └── composables
 ```
 
