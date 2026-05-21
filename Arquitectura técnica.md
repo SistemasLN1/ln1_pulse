@@ -2,6 +2,7 @@
 
 ## 1.1.- Frontend
 
+
 | Componente         | Tecnología   |
 | ------------------ | ------------ |
 | Framework Frontend | Vue 3        |
@@ -12,33 +13,43 @@
 | UI Framework       | Tailwind CSS |
 |                    |              |
 
+
 ---
 
 ## 1.2.- Backend
+
 
 | Componente        | Tecnología               |
 | ----------------- | ------------------------ |
 | Framework Backend | Laravel 12               |
 | Lenguaje          | PHP 8.3                  |
 | Arquitectura API  | REST API                 |
-| Autenticación     | Laravel Sanctum          |
-| ORM               | Eloquent ORM + Functions |
+| Autenticación     | Sesión web + Sanctum (usuarios en MySQL) |
+| Conexiones BD     | MySQL (`legacy`) + PostgreSQL (`pgsql`)  |
+| ORM               | Eloquent ORM + Functions                 |
 | Scheduler         | Laravel Scheduler        |
 |                   |                          |
+
 
 ---
 
 ## 3.3.- Base de Datos
 
-| Componente | Tecnología |
-|---|---|
-| Motor Base de Datos | PostgreSQL 16 |
-| Cache | Redis |
-| Logs | PostgreSQL |
+
+| Componente            | Tecnología    | Responsabilidad                                       |
+| --------------------- | ------------- | ----------------------------------------------------- |
+| Identidad / seguridad | MySQL         | `users`, roles, permisos, departamentos, puestos      |
+| Dominio Pulse         | PostgreSQL 16 | Issues, sprints, métricas, logs de sync, preferencias |
+| Cache / sesiones      | Redis         | Sesiones web y cache de aplicación                    |
+| Logs operativos Pulse | PostgreSQL    | Auditoría del dominio Pulse                           |
+
+> Las tablas de identidad en MySQL **no se migran** a PostgreSQL. Pulse referencia usuarios por `user_id` (= `users.id` en MySQL), sin foreign keys entre motores.
+
 
 ---
 
 ## 3.4.- Integraciones
+
 
 | Servicio          | Tipo                     |
 | ----------------- | ------------------------ |
@@ -47,81 +58,122 @@
 | GitHub API        | Integración futura       |
 | APIs internas LN1 | Integración futura       |
 
+
 ---
 
 ## 3.5.- Infraestructura Producción
 
-| Componente | Tecnología |
-|---|---|
-| Sistema Operativo | Ubuntu Server |
-| Contenedores | Docker |
-| Proxy / Web Server | Nginx |
-| Control de versiones | GitLab |
-| CI/CD | GitLab CI/CD |
+
+| Componente           | Tecnología    |
+| -------------------- | ------------- |
+| Sistema Operativo    | Ubuntu Server |
+| Contenedores         | Docker        |
+| Proxy / Web Server   | Nginx         |
+| Control de versiones | GitLab        |
+| CI/CD                | GitLab CI/CD  |
+
 
 ---
 
 # 3.6.- Arquitectura General del Sistema
 
 ```text
-                 ┌──────────────┐
-                 │     Jira     │
-                 └──────┬───────┘
-                        │ REST API
-                        ▼
-        ┌────────────────────────────┐
-        │      Laravel Backend       │
-        │                            │
-        │ - Sync Jira                │
-        │ - KPIs                     │
-        │ - RBAC                     │
-        │ - Business Logic           │
-        │ - Reports                  │
-        └───────────┬────────────────┘
-                    │
-                    ▼
-             ┌──────────────┐
-             │ PostgreSQL   │
-             │              │
-             │ Issues       │
-             │ Sprints      │
-             │ Metrics      │
-             │ Logs         │
-             └──────┬───────┘
-                    │
-                    ▼
-             ┌──────────────┐
-             │ Vue + Pinia  │
-             │ Frontend UI  │
-             └──────────────┘
+                      ┌──────────────┐
+                      │     Jira     │
+                      └──────┬───────┘
+                             │ REST API / Webhooks
+                             ▼
+┌────────────────────────────────────────────────────────────────┐
+│                     Laravel Backend                             │
+│  Login · RBAC · Policies │ Sync Jira · KPIs · Reports          │
+└───────┬────────────────────────────┬───────────────────┬────────┘
+        │                            │                   │
+        │ AUTH / SEGURIDAD           │ DOMINIO PULSE     │ SESIÓN
+        ▼                            ▼                   ▼
+ ┌─────────────────┐         ┌─────────────────┐   ┌─────────┐
+ │     MySQL       │         │   PostgreSQL    │   │  Redis  │
+ │   (legacy)      │         │     (pulse)     │   │         │
+ ├─────────────────┤         ├─────────────────┤   ├─────────┤
+ │ users           │         │ issues          │   │ sesión  │
+ │ roles           │         │ sprints         │   │ cache   │
+ │ permisos        │         │ metrics         │   └─────────┘
+ │ departamentos   │         │ sync_logs       │
+ │ puestos         │         │                 │
+ │                 │         │ assignee_id,    │
+ │ Fuente única de │         │ created_by, …   │
+ │ identidad       │         │      │          │
+ │ (NO migrate     │         │      │ user_id  │
+ │  desde Pulse)   │◄────────┼──────┘ = users.id
+ └────────┬────────┘  ref.   └─────────────────┘  (sin FK cruzada)
+          │ lógica
+          │ HTTP autenticado
+          ▼
+   ┌──────────────┐
+   │ Vue + Pinia  │
+   │ Frontend UI  │
+   └──────────────┘
 ```
+
+**Lectura del diagrama**
+
+| Rama desde Laravel | Motor        | Para qué se usa                                      |
+| ---------------- | ------------ | ---------------------------------------------------- |
+| Izquierda        | **MySQL**    | Login, contraseñas, roles, permisos, organigrama     |
+| Centro           | **PostgreSQL** | Issues, sprints, KPIs, métricas, logs de sync    |
+| Derecha          | **Redis**    | Persistencia de sesión y cache                       |
+| Flecha PG → MySQL | —           | Solo `user_id`; no hay JOIN ni FK entre bases      |
 
 ---
 
-# 3.7.- Arquitectura Frontend
+# 3.7.- Arquitectura por capas
+
+| Capa            | Tecnología / ubicación              | Responsabilidad                                      |
+| --------------- | ----------------------------------- | ---------------------------------------------------- |
+| Presentación    | Vue 3, Pinia, Axios                 | UI, estado de vista, llamadas al backend             |
+| Aplicación      | Laravel (`Http`, `Services`, `Jobs`) | Auth (MySQL), sync Jira, KPIs, `UserDirectory`      |
+| Dominio         | Eloquent por conexión               | `legacy` → identidad; `pgsql` → datos Pulse          |
+| Datos identidad | **MySQL**                           | `users` y tablas relacionadas (compartidas empresa)  |
+| Datos Pulse     | **PostgreSQL**                      | Tablas operativas; migraciones solo aquí             |
+| Infra transversal | **Redis**                         | Sesiones y cache                                     |
+
+---
+
+# 3.8.- Arquitectura Frontend
 
 ```text
 src/
  ├── layouts
- ├── pages   X
- ├── components              Z
+ ├── pages   
+ ├── components              
  ├── stores
- ├── services           Z
- ├── router           Z
+ ├── services           
+ ├── router           
  └── composables
 ```
 
 ---
 
-# 3.8.- Arquitectura Backend
+# 3.9.- Arquitectura Backend
 
 ```text
 app/
- ├── Http  F
+ ├── Http
+ │    ├── Controllers
+ │    └── Middleware       # auth + RBAC → consulta MySQL
  ├── Services
+ │    └── UserDirectory    # user_id (PG) → datos en MySQL
  ├── Repositories
  ├── Jobs
- ├── Models  FFFFFF
+ ├── Models
+ │    ├── User, Role, …    # conexión legacy (MySQL)
+ │    └── Issue, Sprint, … # conexión pgsql (PostgreSQL)
+ ├── Policies
  ├── Integrations
  └── Console
 ```
+
+| Conexión Eloquent | Motor      | Uso                                              |
+| ----------------- | ---------- | ------------------------------------------------ |
+| `legacy`          | MySQL      | Autenticación, roles, permisos, organigrama      |
+| `pgsql` (default) | PostgreSQL | Dominio Pulse (issues, sprints, métricas, logs)  |
+
