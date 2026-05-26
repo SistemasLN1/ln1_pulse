@@ -1,0 +1,266 @@
+{
+  "project": "ln1_pulse",
+  "layer": "fullstack",
+  "stack": ["Vue 3", "Pinia", "Vue Router", "Axios", "Vite", "Tailwind CSS", "Laravel 12", "PHP 8.3", "MySQL", "PostgreSQL", "Redis", "Sanctum"],
+  "modules": ["dashboard", "proyectos", "avances", "kpis", "integraciones", "configuracion"],
+  "updatedAt": "2026-05-26",
+  "activities": [
+    {
+      "id": "BE-001",
+      "title": "Scaffolding Laravel 12 con configuración multi-database",
+      "category": "arquitectura",
+      "status": "pending",
+      "priority": "high",
+      "description": "Configurar el proyecto Laravel 12 con PHP 8.3, conexiones múltiples de base de datos: SQLite para identidad/auth en desarrollo local (legacy), PostgreSQL local para dominio Pulse (pgsql), y Redis para sesiones/cache. Migraciones iniciales y estructura de carpetas por capas (Controllers, Services, Repositories, Models, Policies, Integrations). En producción legacy apunta a MySQL vía .env.",
+      "acceptanceCriteria": [
+        "El proyecto inicia sin errores con php artisan serve",
+        "La conexión 'legacy' (SQLite en dev) responde correctamente con migraciones de users/roles",
+        "La conexión 'pgsql' (PostgreSQL local) responde correctamente con migraciones de dominio Pulse",
+        "Redis está configurado para sesiones y cache",
+        "La estructura de carpetas sigue la arquitectura definida (Services, Repositories, Policies, Integrations)",
+        "Las migraciones corren sin errores en ambos motores de BD",
+        "El .env.example documenta las variables para ambos entornos (dev con SQLite, prod con MySQL)"
+      ],
+      "subtasks": [
+        {
+          "id": "BE-001-0",
+          "title": "Configurar conexiones de BD para desarrollo local: SQLite para 'legacy' (identidad/auth) y PostgreSQL local para 'pgsql' (dominio Pulse)",
+          "status": "pending",
+          "description": "En desarrollo local se usa SQLite como reemplazo de MySQL para la conexión 'legacy' (users, roles, permisos). Para el dominio Pulse se usa una instancia local de PostgreSQL. Esto permite desarrollar sin depender de MySQL. En producción se switchea a MySQL vía .env.",
+          "validation": "php artisan db:show --database=legacy && php artisan db:show --database=pgsql"
+        },
+        {
+          "id": "BE-001-1",
+          "title": "Configurar .env con DB_CONNECTION=sqlite para legacy y variables PG_* para PostgreSQL local",
+          "status": "pending",
+          "validation": "php artisan migrate --database=legacy && php artisan migrate --database=pgsql"
+        },
+        {
+          "id": "BE-001-2",
+          "title": "Crear estructura de carpetas: Services, Repositories, Policies, Integrations, Jobs",
+          "status": "pending",
+          "validation": "ls app/Services app/Repositories app/Policies app/Integrations app/Jobs"
+        },
+        {
+          "id": "BE-001-3",
+          "title": "Configurar modelo User en conexión 'legacy' (SQLite en dev) con migración de tabla users, roles y permisos",
+          "status": "pending",
+          "validation": "php artisan migrate --database=legacy && php artisan tinker --execute=\"App\\Models\\User::count();\""
+        },
+        {
+          "id": "BE-001-4",
+          "title": "Crear migraciones base en PostgreSQL: issues, sprints, metrics, sync_logs",
+          "status": "pending",
+          "validation": "php artisan migrate --database=pgsql"
+        },
+        {
+          "id": "BE-001-5",
+          "title": "Configurar Redis como driver de sesión y cache, verificar conectividad",
+          "status": "pending",
+          "validation": "php artisan tinker --execute=\"Cache::store('redis')->put('test','ok',10); echo Cache::store('redis')->get('test');\""
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "BE-002",
+      "title": "Autenticación, RBAC y sistema de permisos con Sanctum",
+      "category": "seguridad",
+      "status": "pending",
+      "priority": "high",
+      "description": "Implementar autenticación basada en sesión web + Laravel Sanctum para APIs. Crear sistema RBAC con 5 roles (Admin, Manager, Scrum Master, Developer, Viewer), tablas de roles y permisos en MySQL, middleware de autorización y policies por módulo.",
+      "acceptanceCriteria": [
+        "Login/logout funciona correctamente vía API y sesión web",
+        "Sanctum genera tokens para autenticación API",
+        "Existen los 5 roles definidos: Admin, Manager, Scrum Master, Developer, Viewer",
+        "Los permisos por módulo están configurados según la matriz RBAC",
+        "El middleware de autorización bloquea acceso no autorizado con respuesta 403",
+        "Las policies validan permisos a nivel de modelo"
+      ],
+      "subtasks": [
+        {
+          "id": "BE-002-1",
+          "title": "Instalar y configurar Laravel Sanctum con sesión web + tokens API",
+          "status": "pending",
+          "validation": "php artisan vendor:show laravel/sanctum && php artisan route:list --name=sanctum"
+        },
+        {
+          "id": "BE-002-2",
+          "title": "Crear migraciones de roles, permisos y pivot tables en MySQL (legacy)",
+          "status": "pending",
+          "validation": "php artisan migrate --database=legacy"
+        },
+        {
+          "id": "BE-002-3",
+          "title": "Crear modelos Role, Permission con relaciones y seeder de roles/permisos iniciales",
+          "status": "pending",
+          "validation": "php artisan db:seed --class=RolesAndPermissionsSeeder"
+        },
+        {
+          "id": "BE-002-4",
+          "title": "Crear AuthController con login, logout, me, refreshToken",
+          "status": "pending",
+          "validation": "php artisan route:list --path=api/auth"
+        },
+        {
+          "id": "BE-002-5",
+          "title": "Crear middleware CheckPermission y aplicar a rutas protegidas",
+          "status": "pending",
+          "validation": "php artisan route:list --middleware=permission"
+        },
+        {
+          "id": "BE-002-6",
+          "title": "Crear UserDirectory service para resolver user_id de PostgreSQL contra MySQL",
+          "status": "pending",
+          "validation": "php artisan tinker --execute=\"app(App\\Services\\UserDirectory::class)->resolve(1);\""
+        }
+      ],
+      "dependencies": ["BE-001"]
+    },
+    {
+      "id": "FE-001",
+      "title": "Scaffolding y estructura base del frontend",
+      "category": "arquitectura",
+      "status": "pending",
+      "priority": "high",
+      "description": "Configurar el proyecto frontend con Vue 3, Vite, TypeScript, Tailwind CSS y Pinia. Incluye estructura de carpetas (layouts, pages, components, stores, services, router, composables), configuración de rutas base, alias de paths y archivos de entrada.",
+      "acceptanceCriteria": [
+        "El proyecto compila sin errores con npm run build",
+        "El servidor de desarrollo inicia correctamente con npm run dev",
+        "Los alias de path (@/) funcionan en imports",
+        "Tailwind CSS procesa las clases utilitarias correctamente",
+        "Vue Router navega entre las rutas base sin errores",
+        "Pinia está integrado y funcional"
+      ],
+      "subtasks": [
+        {
+          "id": "FE-001-1",
+          "title": "Crear proyecto con Vite + Vue 3 + TypeScript y configurar plugins",
+          "status": "pending",
+          "validation": "npm run build"
+        },
+        {
+          "id": "FE-001-2",
+          "title": "Configurar Tailwind CSS con tema personalizado y fuentes del proyecto",
+          "status": "pending",
+          "validation": "npm run build"
+        },
+        {
+          "id": "FE-001-3",
+          "title": "Crear estructura de carpetas: layouts, pages, components, stores, services, router, composables, types, utils",
+          "status": "pending",
+          "validation": "ls src/layouts src/pages src/components src/stores src/services src/router src/composables src/types src/utils"
+        },
+        {
+          "id": "FE-001-4",
+          "title": "Configurar Vue Router con rutas base por módulo (dashboard, proyectos, avances, kpis, integraciones, configuracion)",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        },
+        {
+          "id": "FE-001-5",
+          "title": "Integrar Pinia y crear store de ejemplo con setup syntax tipado",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "FE-002",
+      "title": "Capas base, patrones y sistema de componentes UI",
+      "category": "patron-diseno",
+      "status": "pending",
+      "priority": "high",
+      "description": "Implementar patrones fundamentales del frontend: servicio HTTP con axios (interceptors, manejo de errores, token automático), composable useApi, DefaultLayout con sidenav/navbar dinámico según módulo, y sistema de componentes UI reutilizables con variantes.",
+      "acceptanceCriteria": [
+        "Existe instancia de axios con baseURL, interceptors de request (token) y response (errores)",
+        "El composable useApi maneja estados loading/error/data de forma reactiva",
+        "El DefaultLayout renderiza sidenav con los 6 módulos y navbar dinámico",
+        "Los componentes base (Button, Input, Card, Modal, Table) tienen variantes via props",
+        "El layout es responsive y se adapta a pantallas móviles"
+      ],
+      "subtasks": [
+        {
+          "id": "FE-002-1",
+          "title": "Crear instancia HTTP con axios: baseURL, interceptor de token, manejo de 401/403/500",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        },
+        {
+          "id": "FE-002-2",
+          "title": "Crear composable useApi<T> con reactive loading, error, data y métodos get/post/put/delete",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        },
+        {
+          "id": "FE-002-3",
+          "title": "Crear DefaultLayout con sidenav (6 módulos) y navbar dinámico según ruta activa",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        },
+        {
+          "id": "FE-002-4",
+          "title": "Crear componentes UI base: BaseButton, BaseInput, BaseCard, BaseModal, BaseTable",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        },
+        {
+          "id": "FE-002-5",
+          "title": "Crear composable useAuth con estado de sesión, login, logout y verificación de permisos",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        }
+      ],
+      "dependencies": ["FE-001"]
+    },
+    {
+      "id": "FE-003",
+      "title": "Autenticación frontend y protección de rutas",
+      "category": "seguridad",
+      "status": "pending",
+      "priority": "high",
+      "description": "Implementar el flujo completo de autenticación en el frontend: página de login, store de auth con Pinia, guards de navegación en Vue Router basados en roles/permisos, y directivas/composables para control de visibilidad de elementos según RBAC.",
+      "acceptanceCriteria": [
+        "La página de login valida campos y muestra errores del servidor",
+        "El authStore persiste la sesión y el usuario actual con sus permisos",
+        "Las rutas protegidas redirigen a /login si no hay sesión activa",
+        "El guard de navegación verifica permisos del rol contra la ruta solicitada",
+        "Existe directiva v-permission que oculta elementos según permisos del usuario"
+      ],
+      "subtasks": [
+        {
+          "id": "FE-003-1",
+          "title": "Crear authService con métodos login, logout, me, refreshToken contra API backend",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        },
+        {
+          "id": "FE-003-2",
+          "title": "Crear useAuthStore (Pinia) con estado user, token, permissions y acciones de sesión",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        },
+        {
+          "id": "FE-003-3",
+          "title": "Implementar navigation guards: beforeEach para auth y verificación de permisos por ruta",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        },
+        {
+          "id": "FE-003-4",
+          "title": "Crear página LoginPage con formulario, validaciones y feedback de errores",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        },
+        {
+          "id": "FE-003-5",
+          "title": "Crear directiva v-permission y composable usePermission para control de visibilidad RBAC",
+          "status": "pending",
+          "validation": "npx vue-tsc --noEmit"
+        }
+      ],
+      "dependencies": ["FE-002", "BE-002"]
+    }
+  ]
+}
