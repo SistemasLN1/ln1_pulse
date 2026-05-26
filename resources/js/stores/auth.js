@@ -1,25 +1,39 @@
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
+import axiosInstance from '../services/axios'
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        sesionActiva: false,
+        sesionActiva:  false,
         correoUsuario: '',
+        nombreUsuario: '',
     }),
 
     actions: {
         cargarSesion(el) {
-            this.sesionActiva = el.dataset.authenticated === '1';
-            this.correoUsuario = el.dataset.userEmail ?? '';
+            this.sesionActiva  = el.dataset.authenticated === '1'
+            this.correoUsuario = el.dataset.userEmail     ?? ''
+            this.nombreUsuario = el.dataset.userName      ?? ''
         },
 
-        actualizarSesion(email) {
-            this.sesionActiva = true;
-            this.correoUsuario = email;
+        actualizarSesion(nombre, correo) {
+            this.sesionActiva  = true
+            this.correoUsuario = correo
+            this.nombreUsuario = nombre
         },
 
         limpiarSesion() {
-            this.sesionActiva = false;
-            this.correoUsuario = '';
+            this.sesionActiva  = false
+            this.correoUsuario = ''
+            this.nombreUsuario = ''
+        },
+
+        async cerrarSesion() {
+            try {
+                await axiosInstance.post('/logout')
+            } catch {
+                //
+            }
+            this.limpiarSesion()
         },
     },
-});
+})
