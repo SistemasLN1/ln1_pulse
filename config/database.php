@@ -84,7 +84,7 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DATABASE_URL'),
+            'url' => env('DB_URL'),
             'host' => env('DB_PGSQL_HOST', '127.0.0.1'),
             'port' => env('DB_PGSQL_PORT', '5432'),
             'database' => env('DB_PGSQL_DATABASE', 'ln1_pulse'),
