@@ -39,6 +39,26 @@
                 </button>
 
             </form>
+
+            <div v-if="mostrarCredenciales"
+                @click="copiarYPegar('admin@ln1.com', 'Admin123!')"
+                class="mt-6 border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50
+                       cursor-pointer select-none transition-all duration-200
+                       hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm
+                       active:scale-[0.98]">
+                <p class="text-xs font-medium text-gray-500 mb-2">Credenciales de prueba</p>
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600 font-mono">admin@ln1.com</span>
+                        <span class="text-xs text-blue-600 font-medium">
+                            {{ credencialesCopiadas ? '✓ Copiado' : 'Click para usar' }}
+                        </span>
+                    </div>
+                    <div class="text-sm">
+                        <span class="text-gray-600 font-mono">Admin123!</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -60,6 +80,16 @@ const form = ref({
 
 const cargando = ref(false)
 const error = ref('')
+const mostrarCredenciales = import.meta.env.DEV
+
+const credencialesCopiadas = ref(false)
+
+function copiarYPegar(email, password) {
+    form.value.email = email
+    form.value.password = password
+    credencialesCopiadas.value = true
+    setTimeout(() => { credencialesCopiadas.value = false }, 1500)
+}
 
 async function iniciarSesion() {
     error.value = ''

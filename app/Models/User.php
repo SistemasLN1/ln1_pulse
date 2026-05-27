@@ -9,7 +9,7 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    protected $connection = 'legacy';
+    protected $connection = 'legacy_sqlite';
     protected $table = 'usuarios';
     protected $primaryKey = 'id_usuario';
 

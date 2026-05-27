@@ -16,3 +16,6 @@ dist/
 *.local
 Thumbs.dbs
 storage/logs/*
+/database/*.sqlite-journal
+/database/*.sqlite-wal
+/database/*.sqlite-shm
