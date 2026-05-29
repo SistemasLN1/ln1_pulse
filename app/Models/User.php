@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens, Notifiable;
 
-    protected $connection = 'legacy_sqlite';
-    protected $table = 'usuarios';
+    protected $connection = 'mysql';
+    protected $table      = 'usuarios';
     protected $primaryKey = 'id_usuario';
 
     protected $fillable = [
@@ -20,7 +21,6 @@ class User extends Authenticatable
         'usuario_email',
         'usuario_codigo',
         'contraseña',
-        'contraseña_desencriptada',
         'foto',
         'id_nivel',
         'estado',
@@ -31,13 +31,13 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    public function username()
+    public function getAuthIdentifierName(): string
     {
-        return 'usuario_email';
+        return 'id_usuario';
     }
 
-    public function getAuthPassword()
+    public function getAuthPasswordName(): string
     {
-        return $this->contraseña;
+        return 'contraseña';
     }
 }
