@@ -13,15 +13,13 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:6'],
         ]);
 
         $usuario = User::where('usuario_email', $request->email)->first();
 
         if (!$usuario || !Hash::check($request->password, $usuario->contraseña)) {
-            return response()->json([
-                'mensaje' => 'Correo o contraseña incorrectos.',
-            ], 401);
+            return response()->json(['mensaje' => 'Credenciales incorrectas'], 401);
         }
 
         $token = $usuario->createToken('api-token')->plainTextToken;
@@ -39,10 +37,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'mensaje' => 'Token eliminado correctamente.',
-        ]);
+        return response()->json(['mensaje' => 'Sesion cerrada']);
     }
 
     public function me(Request $request)
@@ -59,11 +54,8 @@ class AuthController extends Controller
     public function refreshToken(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-
         $nuevoToken = $request->user()->createToken('api-token')->plainTextToken;
 
-        return response()->json([
-            'token' => $nuevoToken,
-        ]);
+        return response()->json(['token' => $nuevoToken]);
     }
 }

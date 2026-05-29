@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Permiso extends Model
 {
     protected $connection = 'mysql';
-    protected $table      = 'permiso';
+    protected $table = 'permiso';
     protected $primaryKey = 'id_permiso';
-    public $timestamps    = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'nombre',

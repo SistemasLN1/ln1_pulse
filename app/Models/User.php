@@ -11,8 +11,9 @@ class User extends Authenticatable
     use HasApiTokens, Notifiable;
 
     protected $connection = 'mysql';
-    protected $table      = 'usuarios';
+    protected $table = 'usuarios';
     protected $primaryKey = 'id_usuario';
+    public $timestamps = false;
 
     protected $fillable = [
         'usuario_nombres',
@@ -39,5 +40,15 @@ class User extends Authenticatable
     public function getAuthPasswordName(): string
     {
         return 'contraseña';
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(
+            Rol::class,
+            'usuario_rol',
+            'id_usuario',
+            'id_rol'
+        );
     }
 }
