@@ -6,11 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    protected $connection = 'mysql';
+    protected $connection = 'legacy';
 
     public function up(): void
     {
-        Schema::connection('mysql')->create('rol', function (Blueprint $table) {
+        Schema::connection('legacy')->create('rol', function (Blueprint $table) {
             $table->increments('id_rol');
             $table->string('nombre', 100);
             $table->text('descripcion')->nullable();
@@ -19,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection('mysql')->dropIfExists('rol');
+        Schema::connection('legacy')->dropIfExists('rol');
     }
 };

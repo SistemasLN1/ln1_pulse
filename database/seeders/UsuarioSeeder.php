@@ -72,7 +72,7 @@ class UsuarioSeeder extends Seeder
             $rol_nombre = $data['rol'];
             unset($data['rol']);
 
-            $id = DB::connection('mysql')->table('usuarios')->insertGetId([
+            $id = DB::connection('legacy')->table('usuarios')->insertGetId([
                 'usuario_nombres' => $data['usuario_nombres'],
                 'usuario_apater' => $data['usuario_apater'],
                 'usuario_amater' => $data['usuario_amater'],
@@ -87,12 +87,12 @@ class UsuarioSeeder extends Seeder
                 'user_reg' => 1,
             ]);
 
-            $rol = DB::connection('mysql')->table('rol')
+            $rol = DB::connection('legacy')->table('rol')
                 ->where('nombre', $rol_nombre)
                 ->first();
 
             if ($rol) {
-                DB::connection('mysql')->table('usuario_rol')->insert([
+                DB::connection('legacy')->table('usuario_rol')->insert([
                     'id_usuario' => $id,
                     'id_rol' => $rol->id_rol,
                 ]);

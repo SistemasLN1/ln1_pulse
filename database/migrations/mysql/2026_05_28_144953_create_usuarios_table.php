@@ -4,10 +4,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    protected $connection = 'mysql';
+    protected $connection = 'legacy';
 
     public function up(): void {
-        Schema::connection('mysql')->create('usuarios', function (Blueprint $table) {
+        Schema::connection('legacy')->create('usuarios', function (Blueprint $table) {
             $table->increments('id_usuario');
             $table->string('nombre', 100);
             $table->string('email', 150)->unique();
@@ -16,6 +16,6 @@ return new class extends Migration {
     }
 
     public function down(): void {
-        Schema::connection('mysql')->dropIfExists('usuarios');
+        Schema::connection('legacy')->dropIfExists('usuarios');
     }
 };

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Rol extends Model
 {
-    protected $connection = 'mysql';
+    protected $connection = 'legacy';
     protected $table = 'rol';
     protected $primaryKey = 'id_rol';
     public $timestamps = false;

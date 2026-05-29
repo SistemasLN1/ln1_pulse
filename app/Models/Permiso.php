@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Permiso extends Model
 {
-    protected $connection = 'mysql';
+    protected $connection = 'legacy';
     protected $table = 'permiso';
     protected $primaryKey = 'id_permiso';
     public $timestamps = false;
