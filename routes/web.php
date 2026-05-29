@@ -14,6 +14,6 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', fn() => view('spa'))->name('dashboard');
-    Route::get('/dashboard/{any}', fn() => view('spa'))->where('any', '.*');
     Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout');
 });
+Route::get('/{any}', fn() => view('spa'))->where('any', '.*')->name('spa');

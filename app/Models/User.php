@@ -22,13 +22,23 @@ class User extends Authenticatable
         'usuario_email',
         'usuario_codigo',
         'contraseña',
+        'contraseña_desencriptada',
         'foto',
         'id_nivel',
         'estado',
+        'fec_ingreso',
+        'fec_termino',
+        'fec_reg',
+        'user_reg',
+        'fec_act',
+        'useract',
+        'fec_eli',
+        'user_eli',
     ];
 
     protected $hidden = [
         'contraseña',
+        'contraseña_desencriptada',
         'remember_token',
     ];
 
@@ -42,6 +52,16 @@ class User extends Authenticatable
         return 'contraseña';
     }
 
+    public function getAuthPassword()
+    {
+        return $this->contraseña;
+    }
+
+    public function getAuthIdentifier()
+    {
+        return $this->{$this->getAuthIdentifierName()};
+    }
+
     public function roles()
     {
         return $this->belongsToMany(
@@ -50,5 +70,20 @@ class User extends Authenticatable
             'id_usuario',
             'id_rol'
         );
+    }
+
+    public function hasRole($role): bool
+    {
+        return $this->roles()->where('nombre', $role)->exists();
+    }
+
+    public function permisos()
+    {
+        return $this->roles()
+            ->with('permisos')
+            ->get()
+            ->pluck('permisos')
+            ->flatten()
+            ->unique('id_permiso');
     }
 }
