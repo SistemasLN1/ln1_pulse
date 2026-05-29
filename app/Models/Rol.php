@@ -6,5 +6,33 @@ use Illuminate\Database\Eloquent\Model;
 
 class Rol extends Model
 {
-    //
+    protected $connection = 'mysql';
+    protected $table      = 'rol';
+    protected $primaryKey = 'id_rol';
+    public $timestamps    = false;
+
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+    ];
+
+    public function permisos()
+    {
+        return $this->belongsToMany(
+            Permiso::class,
+            'rol_permiso',
+            'id_rol',
+            'id_permiso'
+        );
+    }
+
+    public function usuarios()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'usuario_rol',
+            'id_rol',
+            'id_usuario'
+        );
+    }
 }
