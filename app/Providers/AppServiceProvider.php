@@ -20,5 +20,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(database_path('migrations/pgsql'));
+        $this->loadMigrationsFrom(database_path('migrations/mysql'));
     }
 }
